@@ -22,7 +22,7 @@ class Grabber() {
     val collection = callCollection()
     val algolCheck = new AlgolCheck(Setting.graphApiKey)
 
-    def putItToQue(json: JSONObject): Unit = {
+    def putItToDb(json: JSONObject): Unit = {
       val abbreviated = Namer.abbreviateJson(json)
 
       try collection.insertOne(Document(abbreviated.toString))
@@ -32,7 +32,7 @@ class Grabber() {
       if (count % 1000 == 0) println(s"Grabbing $pageName : $count")
     }
 
-    algolCheck.requestData(pageName + "/feed").foreach(putItToQue)
+    algolCheck.requestData(pageName + "/feed").foreach(putItToDb)
     count
   }
 }

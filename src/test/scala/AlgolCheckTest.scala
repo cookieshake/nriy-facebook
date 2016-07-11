@@ -8,5 +8,7 @@ object AlgolCheckTest {
   def main(args: Array[String]) {
     val algolcheck = new AlgolCheck(Setting.graphApiKey)
     print(algolcheck.request())
+
+
   }
 }

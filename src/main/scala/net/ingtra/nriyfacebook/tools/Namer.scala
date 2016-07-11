@@ -43,6 +43,7 @@ object Namer {
 
     def change(key: String): Unit = {
       if (json.optJSONObject(key) != null) json.put(key, changeJsonKeys(json.getJSONObject(key), how))
+
       if (json.optJSONArray(key) != null) {
         val array = json.getJSONArray(key)
         for (i <- 0 until array.length())
