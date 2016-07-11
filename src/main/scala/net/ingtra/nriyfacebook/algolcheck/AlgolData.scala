@@ -5,7 +5,8 @@ import org.json.JSONObject
 
 import scala.collection.mutable
 
-class AlgolData(json: JSONObject) {
+class
+AlgolData(json: JSONObject) {
   private val que = new mutable.Queue[JSONObject]
   private var currentJson = json
   que ++= getData()

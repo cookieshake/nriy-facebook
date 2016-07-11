@@ -12,5 +12,4 @@ object Setting {
 
   val pageGrabDbName = setting.getString("pageGrabDbName")
   val pageGrabCollName = setting.getString("pageGrabCollName")
-
 }
