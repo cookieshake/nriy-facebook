@@ -5,7 +5,7 @@ import org.json.JSONObject
 import scala.io.Source
 
 object Setting {
-  val setting = new JSONObject(Source.fromFile("./setting.json").mkString)
+  private val setting = new JSONObject(Source.fromFile("./setting.json").mkString)
 
   val mongoDbHost = setting.getString("mongoDbHost")
   val graphApiKey = setting.getString("graphApiKey")
