@@ -1,0 +1,7 @@
+{
+  "mongoDbHost":"",
+  "graphApiKey":"",
+
+  "pageGrabDbName":"",
+  "pageGrabCollName":""
+}
