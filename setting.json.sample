@@ -6,5 +6,8 @@
   "pageGrabCollName":"",
 
   "tokenizedDbName":"",
-  "tokenizedCollName":""
+  "tokenizedCollName":"",
+
+  "termIdDbName":"",
+  "termIdCollName":""
 }

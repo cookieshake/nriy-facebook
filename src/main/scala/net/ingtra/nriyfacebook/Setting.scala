@@ -18,4 +18,7 @@ object Setting {
 
   val idfDbName = setting.getString("idfDbName")
   val idfCollName = setting.getString("idfCollName")
+
+  val termIdDbName = setting.getString("termIdDbName")
+  val termIdCollName = setting.getString("termIdCollName")
 }
