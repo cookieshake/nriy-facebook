@@ -1,9 +1,8 @@
 package net.ingtra.nriyfacebook.tools
 
-import com.twitter.penguin.korean.TwitterKoreanProcessor
+
 import com.twitter.penguin.korean.TwitterKoreanProcessor._
-import com.twitter.penguin.korean.tokenizer.KoreanTokenizer.KoreanToken
-import com.twitter.penguin.korean.tokenizer.TokenizerProfile
+import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonString}
 
 import scala.collection.mutable
 

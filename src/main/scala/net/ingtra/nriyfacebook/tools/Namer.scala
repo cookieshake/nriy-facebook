@@ -21,7 +21,9 @@ object Namer {
     "after" -> "af",
     "next" -> "nx",
     "previous" -> "pv",
-    "paging" -> "pg"
+    "paging" -> "pg",
+    "tokens" -> "ts",
+    "string" -> "st"
   )
 
   val reversedMap = mutable.Map.empty[String, String]

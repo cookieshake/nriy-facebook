@@ -2,12 +2,16 @@ package net.ingtra.nriyfacebook
 
 
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 import net.ingtra.nriyfacebook.algolcheck.AlgolCheck
 import net.ingtra.nriyfacebook.tools.{GetResults, Namer, TfMap}
 import org.json.JSONObject
+import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.{MongoClient, MongoCollection, MongoWriteException}
 import org.mongodb.scala.bson.collection.immutable.Document
+
+import scala.collection.mutable
 
 
 object Grabber {
@@ -40,33 +44,5 @@ object Grabber {
     algolCheck.requestData(pageName + "/feed").foreach(putItToDb)
     count
   }
-
-  def tokenize(): Unit = {
-    val tokenizedCollection = MongoClient("mongodb://" + Setting.mongoDbHost)
-      .getDatabase(Setting.tokenizedDbName)
-      .getCollection(Setting.tokenizedCollName)
-
-    val pageCollection = callPageCollection()
-
-    val que = new LinkedBlockingQueue[Document]()
-
-    val thread = new Thread {
-      override def run() = {
-        while (true) {
-          if(!que.isEmpty) {
-            val json = new JSONObject(que.peek().toJson)
-            val msg = json.getString(Namer.abbreviate("message"))
-
-            println(TfMap(msg))
-          }
-        }
-      }
-    }
-
-    thread.start()
-
-    val docs = GetResults(pageCollection.find())
-    que.put(docs.head)
-
-  }
 }
+
