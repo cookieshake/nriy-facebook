@@ -3,5 +3,8 @@
   "graphApiKey":"",
 
   "pageGrabDbName":"",
-  "pageGrabCollName":""
+  "pageGrabCollName":"",
+
+  "tokenizedDbName":"",
+  "tokenizedCollName":""
 }

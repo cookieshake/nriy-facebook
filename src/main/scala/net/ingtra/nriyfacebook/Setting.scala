@@ -12,4 +12,10 @@ object Setting {
 
   val pageGrabDbName = setting.getString("pageGrabDbName")
   val pageGrabCollName = setting.getString("pageGrabCollName")
+
+  val tokenizedDbName = setting.getString("tokenizedDbName")
+  val tokenizedCollName = setting.getString("tokenizedCollName")
+
+  val idfDbName = setting.getString("idfDbName")
+  val idfCollName = setting.getString("idfCollName")
 }
