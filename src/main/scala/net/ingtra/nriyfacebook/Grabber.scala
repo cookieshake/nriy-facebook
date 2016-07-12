@@ -32,7 +32,6 @@ class Grabber() {
 
       count += 1
       if (count % 1000 == 0) println(s"Grabbing $pageName : $count")
-
     }
 
     algolCheck.requestData(pageName + "/feed").foreach(putItToDb)
