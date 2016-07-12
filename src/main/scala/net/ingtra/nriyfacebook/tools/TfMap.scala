@@ -1,0 +1,29 @@
+package net.ingtra.nriyfacebook.tools
+
+import com.twitter.penguin.korean.TwitterKoreanProcessor
+import com.twitter.penguin.korean.TwitterKoreanProcessor._
+import com.twitter.penguin.korean.tokenizer.KoreanTokenizer.KoreanToken
+import com.twitter.penguin.korean.tokenizer.TokenizerProfile
+
+import scala.collection.mutable
+
+object TfMap {
+  def apply(str: String): Map[String, Double] = {
+    val stopWords = Array("Space", "Punctuation", "Josa", "Eomi")
+    val map = mutable.Map[String, Double]()
+    val tokenized = stem(tokenize(str))
+
+    for (token <- tokenized) {
+      if (!stopWords.contains(token.pos.toString)) {
+        if (!map.contains(token.text)) map(token.text) = 1
+        else map(token.text) += 1
+      }
+    }
+
+    map.foreach(
+      (tuple: (String, Double)) => map(tuple._1) = tuple._2 / tokenized.size
+    )
+
+    map.toMap
+  }
+}
