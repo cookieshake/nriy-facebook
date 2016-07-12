@@ -12,6 +12,4 @@ object Term {
     .getCollection(Setting.idfCollName)
 
   val idfMap = Map[String, Double]()
-
-
 }

@@ -50,7 +50,7 @@ object Tokenizer {
     val que = new LinkedBlockingQueue[Document]()
     val count = new AtomicInteger(0)
 
-    class tokenizer extends Thread {
+    class TokenizeWorker extends Thread {
       var flag = true
 
       override def run() = {
@@ -74,7 +74,7 @@ object Tokenizer {
       def exit() = flag = false
     }
 
-    val threads = for (i <- 1 to thr) yield new tokenizer()
+    val threads = for (i <- 1 to thr) yield new TokenizeWorker()
     threads.foreach(_.start)
 
     val docs = GetResults(pageCollection.find())

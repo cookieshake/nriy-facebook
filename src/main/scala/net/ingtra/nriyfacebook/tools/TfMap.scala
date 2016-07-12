@@ -2,7 +2,6 @@ package net.ingtra.nriyfacebook.tools
 
 
 import com.twitter.penguin.korean.TwitterKoreanProcessor._
-import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonString}
 
 import scala.collection.mutable
 

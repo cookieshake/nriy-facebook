@@ -22,7 +22,6 @@ object Grabber {
     if (!GetResults(db.listCollectionNames()).contains(Setting.pageGrabCollName))
       GetResults(db.createCollection(Setting.pageGrabCollName))
 
-
     coll
   }
 
