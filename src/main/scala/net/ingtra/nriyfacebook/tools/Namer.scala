@@ -63,6 +63,6 @@ object Namer {
   def abbreviateJson(from: JSONObject): JSONObject = changeJsonKeys(from, abbreviate)
   def expandJson(from: JSONObject): JSONObject = changeJsonKeys(from, expand)
 
-  def abbreviateDocument(from: Document): Document = Document(abbreviateJson(new JSONObject(from.toString)).toString)
-  def expandDocument(from: Document): Document = Document(expandJson(new JSONObject(from.toString)).toString)
+  def abbreviateDocument(from: Document): Document = Document(abbreviateJson(new JSONObject(from.toJson)).toString)
+  def expandDocument(from: Document): Document = Document(expandJson(new JSONObject(from.toJson)).toString)
 }

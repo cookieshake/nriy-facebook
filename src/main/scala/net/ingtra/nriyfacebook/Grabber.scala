@@ -28,7 +28,7 @@ class Grabber() {
       val abbreviated = Namer.abbreviateJson(json)
 
       try GetResults(collection.insertOne(Document(abbreviated.toString)))
-      catch { case e: MongoWriteException => println(e.getMessage) }
+      catch { case e: MongoWriteException => println(s"Count: $count " + e.getMessage) }
 
       count += 1
       if (count % 1000 == 0) println(s"Grabbing $pageName : $count")
