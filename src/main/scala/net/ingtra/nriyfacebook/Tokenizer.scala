@@ -9,9 +9,6 @@ import org.mongodb.scala.MongoClient
 import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonString}
 import org.mongodb.scala.bson.collection.immutable.Document
 
-/**
-  * Created by ic on 2016-07-13.
-  */
 object Tokenizer {
   private def mapToBsonArray(map: Map[String, Double]): BsonArray = {
     val bsonArray = BsonArray()
