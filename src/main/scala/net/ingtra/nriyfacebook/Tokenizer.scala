@@ -56,15 +56,13 @@ object Tokenizer {
             try {
               val content = que.take()
               val doc = contentToDoc(content)
-
               GetResults(tokenizedCollection.insertOne(doc))
             } catch {
               case e: Exception => println(e.getMessage)
             }
-
             if (count.get() % 1000 == 0) println("Tokenizing: " + count.get())
             count.addAndGet(1)
-          }
+          } else Thread.sleep(100)
         }
       }
 
