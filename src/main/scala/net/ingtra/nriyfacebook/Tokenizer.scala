@@ -36,7 +36,7 @@ object Tokenizer {
     Document(bsonDoc)
   }
 
-  def apply(thr: Int = 1): Unit = {
+  def apply(threads: Int = 1): Unit = {
     val tokenizedCollection = MongoClient("mongodb://" + Setting.mongoDbHost)
       .getDatabase(Setting.tokenizedDbName)
       .getCollection(Setting.tokenizedCollName)
@@ -60,8 +60,10 @@ object Tokenizer {
             } catch {
               case e: Exception => println(e.getMessage)
             }
-            if (count.get() % 1000 == 0) println("Tokenizing: " + count.get())
-            count.addAndGet(1)
+
+            val now = count.addAndGet(1)
+            if (now % 1000 == 0) println("Tokenizing: " + now)
+
           } else Thread.sleep(100)
         }
       }
@@ -69,7 +71,7 @@ object Tokenizer {
       def exit() = flag = false
     }
 
-    val threads = for (i <- 1 to thr) yield new TokenizeWorker()
+    val threads = for (i <- 1 to threads) yield new TokenizeWorker()
     threads.foreach(_.start)
 
     val docs = GetResults(pageCollection.find())
