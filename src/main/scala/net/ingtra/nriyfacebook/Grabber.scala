@@ -15,19 +15,12 @@ import scala.collection.mutable
 
 
 object Grabber {
-  private def callPageCollection(): MongoCollection[Document] = {
-    val db = MongoClient("mongodb://" + Setting.mongoDbHost).getDatabase(Setting.pageGrabDbName)
-    val coll = db.getCollection(Setting.pageGrabCollName)
-
-    if (!GetResults(db.listCollectionNames()).contains(Setting.pageGrabCollName))
-      GetResults(db.createCollection(Setting.pageGrabCollName))
-
-    coll
-  }
-
   def grabPage(pageName: String): Int = {
     var count = 0
-    val collection = callPageCollection()
+    val collection = MongoClient("mongodb://" + Setting.mongoDbHost)
+      .getDatabase(Setting.pageGrabDbName)
+      .getCollection(Setting.pageGrabCollName)
+
     val algolCheck = new AlgolCheck(Setting.graphApiKey)
 
     def putItToDb(json: JSONObject): Unit = {

@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import net.ingtra.nriyfacebook.tools.{GetResults, Namer, TfMap}
 import org.json.JSONObject
 import org.mongodb.scala.MongoClient
-import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonString}
+import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonInt32, BsonString}
 import org.mongodb.scala.bson.collection.immutable.Document
 
 object Tokenizer {
@@ -40,6 +40,11 @@ object Tokenizer {
     val tokenizedCollection = MongoClient("mongodb://" + Setting.mongoDbHost)
       .getDatabase(Setting.tokenizedDbName)
       .getCollection(Setting.tokenizedCollName)
+
+    val indexQuery = BsonDocument()
+    indexQuery.put(Namer.abbreviate("tokens") + "." + Namer.abbreviate("string"), BsonInt32(-1))
+    GetResults(tokenizedCollection.createIndex(indexQuery))
+
     val pageCollection = MongoClient("mongodb://" + Setting.mongoDbHost)
       .getDatabase(Setting.pageGrabDbName)
       .getCollection(Setting.pageGrabCollName)
@@ -71,11 +76,11 @@ object Tokenizer {
       def exit() = flag = false
     }
 
-    val threads = for (i <- 1 to threads) yield new TokenizeWorker()
-    threads.foreach(_.start)
+    val threadSeq = for (i <- 1 to threads) yield new TokenizeWorker()
+    threadSeq.foreach(_.start)
 
     val docs = GetResults(pageCollection.find())
     docs.foreach(que.put)
-    threads.foreach(_.exit())
+    threadSeq.foreach(_.exit())
   }
 }
