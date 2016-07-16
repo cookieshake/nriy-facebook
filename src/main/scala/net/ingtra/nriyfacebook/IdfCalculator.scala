@@ -17,14 +17,19 @@ object IdfCalculator {
 
   def putIdf(string: String, idf: Double): Unit = {
     val bson = BsonDocument()
-    bson.put("_id", BsonString(string))
-    bson.put("idf", BsonDouble(idf))
+      .append("_id", BsonString(string))
+      .append("idf", BsonDouble(idf))
 
-    idfCollection.insertOne(Document(bson))
+    try
+      GetResults(idfCollection.insertOne(Document(bson)))
+    catch {
+      case e: Exception => println(e)
+    }
   }
 
   def calculate(): Unit = {
     val tokenSet = mutable.HashSet[String]()
+    val documentCount = GetResults(tokenizedCollection.count()).head
 
     for (content <- GetResults(tokenizedCollection.find())) {
       val tokens = content.toBsonDocument.getArray(Namer.abbreviate("tokens")).iterator()
@@ -32,7 +37,14 @@ object IdfCalculator {
         val token = tokens.next().asDocument().getString(Namer.abbreviate("string")).getValue
         if (!tokenSet.contains(token)) {
           val query = BsonDocument()
+            .append(Namer.abbreviate("tokens"), BsonDocument()
+              .append("$elemMatch", BsonDocument()
+                .append(Namer.abbreviate("string"), BsonString(token))))
+          val count = GetResults(tokenizedCollection.count(query)).head
+          val idf = math.log(documentCount / count)
 
+          putIdf(token, idf)
+          tokenSet.add(token)
         }
       }
     }
