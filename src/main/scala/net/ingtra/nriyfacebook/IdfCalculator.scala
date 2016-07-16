@@ -1,11 +1,15 @@
 package net.ingtra.nriyfacebook
 
+import java.util.concurrent.TimeUnit
+
+import com.mongodb.CursorType
 import net.ingtra.nriyfacebook.tools.{GetResults, Namer}
 import org.mongodb.scala.MongoClient
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonDouble, BsonString}
 
 import scala.collection.mutable
+import scala.concurrent.duration.Duration
 
 object IdfCalculator {
   val tokenizedCollection = MongoClient("mongodb://" + Setting.mongoDbHost)
@@ -30,8 +34,9 @@ object IdfCalculator {
   def calculate(): Unit = {
     val tokenSet = mutable.HashSet[String]()
     val documentCount = GetResults(tokenizedCollection.count()).head
+    var count = 0
 
-    for (content <- GetResults(tokenizedCollection.find())) {
+    def handleContent(content: Document): Unit = {
       val tokens = content.toBsonDocument.getArray(Namer.abbreviate("tokens")).iterator()
       while (tokens.hasNext) {
         val token = tokens.next().asDocument().getString(Namer.abbreviate("string")).getValue
@@ -40,14 +45,21 @@ object IdfCalculator {
             .append(Namer.abbreviate("tokens"), BsonDocument()
               .append("$elemMatch", BsonDocument()
                 .append(Namer.abbreviate("string"), BsonString(token))))
-          val count = GetResults(tokenizedCollection.count(query)).head
-          val idf = math.log(documentCount / count)
+          val haveToken = GetResults(tokenizedCollection.count(query)).head
+          val idf = math.log(documentCount / haveToken)
 
           putIdf(token, idf)
           tokenSet.add(token)
         }
       }
+      count += 1
+      if (count % 500 ==0) println(s"Calculating: $count/$documentCount")
     }
+
+    var finished = false
+    tokenizedCollection.find().subscribe((doc: Document) => handleContent(doc), (err: Throwable) => println(err), () => finished = true)
+
+    while (!finished) Thread.sleep(1000)
 
   }
 
