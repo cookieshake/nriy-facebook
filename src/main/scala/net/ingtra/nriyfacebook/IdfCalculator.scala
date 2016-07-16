@@ -1,15 +1,11 @@
 package net.ingtra.nriyfacebook
 
-import java.util.concurrent.TimeUnit
-
-import com.mongodb.CursorType
 import net.ingtra.nriyfacebook.tools.{GetResults, Namer}
 import org.mongodb.scala.MongoClient
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonDouble, BsonString}
 
 import scala.collection.mutable
-import scala.concurrent.duration.Duration
 
 object IdfCalculator {
   val tokenizedCollection = MongoClient("mongodb://" + Setting.mongoDbHost)

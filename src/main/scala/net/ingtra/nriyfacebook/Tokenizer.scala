@@ -4,7 +4,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 import net.ingtra.nriyfacebook.tools.{GetResults, Namer, TfMap}
-import org.json.JSONObject
 import org.mongodb.scala.MongoClient
 import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonInt32, BsonString}
 import org.mongodb.scala.bson.collection.immutable.Document
@@ -67,7 +66,7 @@ object Tokenizer {
             }
 
             val now = count.addAndGet(1)
-            if (now % 1000 == 0) println("Tokenizing: " + now)
+            if (now % 1000 == 0 && now != 0) println("Tokenizing: " + now)
 
           } else Thread.sleep(100)
         }
@@ -79,8 +78,13 @@ object Tokenizer {
     val threadSeq = for (i <- 1 to threads) yield new TokenizeWorker()
     threadSeq.foreach(_.start)
 
-    val docs = GetResults(pageCollection.find())
-    docs.foreach(que.put)
+    //val docs = GetResults(pageCollection.find())
+    //docs.foreach(que.put)
+
+    var finished = false
+    pageCollection.find().subscribe((doc: Document) => que.put(doc), (err: Throwable) => println(err), () => finished = true)
+    while (!finished) Thread.sleep(1000)
+
     threadSeq.foreach(_.exit())
   }
 }
