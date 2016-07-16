@@ -21,4 +21,5 @@ object Setting {
 
   val termIdDbName = setting.getString("termIdDbName")
   val termIdCollName = setting.getString("termIdCollName")
+
 }
