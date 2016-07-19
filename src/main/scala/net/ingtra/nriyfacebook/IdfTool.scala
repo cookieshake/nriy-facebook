@@ -73,6 +73,7 @@ object IdfTool {
 
   def transitTokenizeds(): Unit = {
     val idfMap = mutable.HashMap[String, Double]()
+    var count = 0
 
     def handleDocument(doc: Document): Unit = {
       def idf(string: String): Double = {
@@ -106,6 +107,8 @@ object IdfTool {
       bsonDoc.replace(Namer.abbreviate("tokens"), changedArray)
 
       GetResults(idfedCollection.insertOne(Document(bsonDoc)))
+      count += 1
+      if (count % 1000 == 0) println(s"Now: $count")
     }
 
     var finished = false
