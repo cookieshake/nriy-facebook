@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 object TfMap {
   def apply(str: String): Map[String, Double] = {
-    val stopWords = Array("Space", "Punctuation", "Josa", "Eomi")
+    val stopWords = Array("Space", "Punctuation", "Josa", "Eomi", "Hashtag", "Conjunction", "Number")
     val map = mutable.Map[String, Double]()
     val tokenized = stem(tokenize(str))
 
