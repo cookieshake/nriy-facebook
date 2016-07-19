@@ -1,25 +1,56 @@
 package net.ingtra.nriyfacebook
 
-import org.json.JSONObject
+import java.io.FileNotFoundException
+
+import org.json.{JSONException, JSONObject}
 
 import scala.io.Source
 
 object Setting {
-  private val setting = new JSONObject(Source.fromFile("./setting.json").mkString)
+  var setting: JSONObject = null
 
-  val mongoDbHost = setting.getString("mongoDbHost")
-  val graphApiKey = setting.getString("graphApiKey")
+  var mongoDbHost: String = null
+  var graphApiKey: String = null
 
-  val pageGrabDbName = setting.getString("pageGrabDbName")
-  val pageGrabCollName = setting.getString("pageGrabCollName")
+  var pageGrabDbName: String = null
+  var pageGrabCollName: String = null
 
-  val tokenizedDbName = setting.getString("tokenizedDbName")
-  val tokenizedCollName = setting.getString("tokenizedCollName")
+  var tokenizedDbName: String = null
+  var tokenizedCollName: String = null
 
-  val idfDbName = setting.getString("idfDbName")
-  val idfCollName = setting.getString("idfCollName")
+  var idfDbName: String = null
+  var idfCollName: String = null
 
-  val termIdDbName = setting.getString("termIdDbName")
-  val termIdCollName = setting.getString("termIdCollName")
+  var termIdDbName: String = null
+  var termIdCollName: String = null
 
+  var idfedDbName: String = null
+  var idfedCollName: String = null
+
+
+  try {
+    setting = new JSONObject(Source.fromFile("./setting.json").mkString)
+
+    mongoDbHost = setting.getString("mongoDbHost")
+    graphApiKey = setting.getString("graphApiKey")
+
+    pageGrabDbName = setting.getString("pageGrabDbName")
+    pageGrabCollName = setting.getString("pageGrabCollName")
+
+    tokenizedDbName = setting.getString("tokenizedDbName")
+    tokenizedCollName = setting.getString("tokenizedCollName")
+
+    idfDbName = setting.getString("idfDbName")
+    idfCollName = setting.getString("idfCollName")
+
+    termIdDbName = setting.getString("termIdDbName")
+    termIdCollName = setting.getString("termIdCollName")
+
+    idfedDbName = setting.getString("idfedDbName")
+    idfedCollName = setting.getString("idfedCollName")
+
+  } catch {
+    case e: FileNotFoundException => println("No setting.json!"); System.exit(0)
+    case e: JSONException => println("Please check setting.json!"); System.exit(0)
+  }
 }
