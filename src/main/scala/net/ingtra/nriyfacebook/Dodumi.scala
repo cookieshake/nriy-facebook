@@ -1,7 +1,7 @@
 package net.ingtra.nriyfacebook
 
 import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicInteger, AtomicLong, AtomicReference, DoubleAdder}
 
 import net.ingtra.nriyfacebook.tools.{CosineSimularity, GetResults, Namer, TfMap}
 import org.mongodb.scala.bson.collection.immutable.Document
@@ -29,15 +29,22 @@ object Dodumi {
     map.toMap
   }
 
-  def compare(string: String, thread: Int = 1): Unit = {
+  def compare(string: String, thread: Int = 1): Array[(String, Double)] = {
     val tfMap = TfMap(string)
     var count = new AtomicInteger()
     val que = new LinkedBlockingDeque[Document]()
 
-    def handleDocument(doc: Document) = {
+    var result = mutable.ArrayBuffer[(String, Double)]()
+
+    def handleDocument(doc: Document): Unit = {
       val bsonDoc = doc.toBsonDocument
       val bsonArray = bsonDoc.getArray(Namer.abbreviate("tokens"))
       val tfMap2 = bsonArrayToMap(bsonArray)
+
+      val id = bsonDoc.getString(Namer.abbreviate("id")).getValue
+      val score = CosineSimularity(tfMap, tfMap2)
+
+      result.append((id, score))
     }
 
     class DodumiWorker extends Thread {
@@ -47,6 +54,7 @@ object Dodumi {
         while (!que.isEmpty || flag) {
           if (!que.isEmpty) {
             handleDocument(que.take())
+
             val now = count.getAndAdd(1)
             if (now % 1000 == 0) println(s"Now: $now")
           } else Thread.sleep(100)
@@ -67,6 +75,9 @@ object Dodumi {
 
     threads.foreach(_.exit())
     threads.foreach(_.join())
+
+    result = result.sortBy(_._2).reverse
+    result.toArray
   }
 
 }
