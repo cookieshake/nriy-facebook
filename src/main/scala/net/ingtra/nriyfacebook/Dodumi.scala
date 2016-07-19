@@ -66,6 +66,7 @@ object Dodumi {
     while (!finished) Thread.sleep(1000)
 
     threads.foreach(_.exit())
+    threads.foreach(_.join())
   }
 
 }

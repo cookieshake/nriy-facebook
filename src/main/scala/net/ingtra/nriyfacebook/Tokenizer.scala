@@ -83,5 +83,6 @@ object Tokenizer {
     while (!finished) Thread.sleep(1000)
 
     threadSeq.foreach(_.exit())
+    threadSeq.foreach(_.join())
   }
 }
