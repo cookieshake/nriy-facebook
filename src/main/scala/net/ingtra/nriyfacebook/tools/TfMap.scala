@@ -24,4 +24,15 @@ object TfMap {
 
     map.toMap
   }
+
+  def withIdf(str: String, idf: (String) => (Double)): Map[String, Double] = {
+    val map = apply(str)
+    val idfMap = mutable.Map[String, Double]()
+
+    map.foreach(
+      (tuple: (String, Double)) => idfMap(tuple._1) = tuple._2 * idf(tuple._1)
+    )
+
+    idfMap.toMap
+  }
 }
