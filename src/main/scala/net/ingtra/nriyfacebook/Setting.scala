@@ -15,6 +15,9 @@ object Setting {
   var pageGrabDbName: String = null
   var pageGrabCollName: String = null
 
+  var commentGrabDbName: String = null
+  var commentGrabCollName: String = null
+
   var tokenizedDbName: String = null
   var tokenizedCollName: String = null
 
@@ -36,6 +39,9 @@ object Setting {
 
     pageGrabDbName = setting.getString("pageGrabDbName")
     pageGrabCollName = setting.getString("pageGrabCollName")
+
+    commentGrabDbName = setting.getString("commentGrabDbName")
+    commentGrabCollName = setting.getString("commentGrabCollName")
 
     tokenizedDbName = setting.getString("tokenizedDbName")
     tokenizedCollName = setting.getString("tokenizedCollName")
