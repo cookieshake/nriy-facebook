@@ -30,7 +30,7 @@ object Dodumi {
   }
 
   def compare(string: String, thread: Int = 1): Array[(String, Double)] = {
-    val tfMap = TfMap(string)
+    val tfMap = TfMap.withIdf(string, IdfTool.getIdf)
     val count = new AtomicInteger()
     val que = new LinkedBlockingDeque[Document]()
 
@@ -84,8 +84,9 @@ object Dodumi {
       while (!finished) Thread.sleep(1000)
     }
 
-    val resultArray = result.toArray[(String, Double)](Array[(String, Double)]())
-    resultArray.sortBy(_._2)
+    var resultArray = result.toArray[(String, Double)](Array[(String, Double)]())
+    resultArray = resultArray.sortBy(_._2)
+    resultArray.reverse
   }
 
 }
