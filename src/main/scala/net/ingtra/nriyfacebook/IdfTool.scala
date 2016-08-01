@@ -68,7 +68,10 @@ object IdfTool {
     val query = BsonDocument().append("_id", BsonString(string))
     val findResult = GetResults(idfCollection.find(query).first)
 
-    findResult.head.toBsonDocument.getDouble("idf").getValue
+    if (findResult.size != 0)
+      findResult.head.toBsonDocument.getDouble("idf").getValue
+    else
+      1.0
   }//GetResults(idfCollection.find(BsonDocument().append("_id", BsonString(string))).first).head.toBsonDocument.getDouble("idf").getValue
 
   def transitTokenizeds(): Unit = {
