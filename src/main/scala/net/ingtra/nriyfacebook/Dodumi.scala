@@ -1,6 +1,6 @@
 package net.ingtra.nriyfacebook
 
-import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.{CopyOnWriteArrayList, LinkedBlockingDeque}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong, AtomicReference, DoubleAdder}
 
 import net.ingtra.nriyfacebook.tools.{CosineSimularity, GetResults, Namer, TfMap}
@@ -31,10 +31,10 @@ object Dodumi {
 
   def compare(string: String, thread: Int = 1): Array[(String, Double)] = {
     val tfMap = TfMap(string)
-    var count = new AtomicInteger()
+    val count = new AtomicInteger()
     val que = new LinkedBlockingDeque[Document]()
 
-    var result = mutable.ArrayBuffer[(String, Double)]()
+    val result = new CopyOnWriteArrayList[(String, Double)]()
 
     def handleDocument(doc: Document): Unit = {
       val bsonDoc = doc.toBsonDocument
@@ -44,7 +44,10 @@ object Dodumi {
       val id = bsonDoc.getString(Namer.abbreviate("id")).getValue
       val score = CosineSimularity(tfMap, tfMap2)
 
-      result.append((id, score))
+      val now = count.getAndAdd(1)
+      if (now % 1000 == 0) println(s"Now: $now")
+
+      result.add((id, score))
     }
 
     class DodumiWorker extends Thread {
@@ -55,8 +58,6 @@ object Dodumi {
           if (!que.isEmpty) {
             handleDocument(que.take())
 
-            val now = count.getAndAdd(1)
-            if (now % 1000 == 0) println(s"Now: $now")
           } else Thread.sleep(100)
         }
       }
@@ -65,19 +66,26 @@ object Dodumi {
       def exit() = flag = false
     }
 
-    val threads = for (i <- 1 to thread) yield new DodumiWorker()
+    if (thread != 1) {
+      val threads = for (i <- 1 to thread) yield new DodumiWorker()
 
-    threads.foreach(_.start())
+      threads.foreach(_.start())
 
-    var finished = false
-    idfedCollection.find().subscribe((doc: Document) => que.put(doc), (err: Throwable) => println(err), () => finished = true)
-    while (!finished) Thread.sleep(1000)
+      var finished = false
+      idfedCollection.find().subscribe((doc: Document) => que.put(doc), (err: Throwable) => println(err), () => finished = true)
+      while (!finished) Thread.sleep(1000)
 
-    threads.foreach(_.exit())
-    threads.foreach(_.join())
+      threads.foreach(_.exit())
+      threads.foreach(_.join())
 
-    result = result.sortBy(_._2).reverse
-    result.toArray
+    } else {
+      var finished = false
+      idfedCollection.find().subscribe((doc: Document) => handleDocument(doc), (err: Throwable) => println(err), () => finished = true)
+      while (!finished) Thread.sleep(1000)
+    }
+
+    val resultArray = result.toArray[(String, Double)](Array[(String, Double)]())
+    resultArray.sortBy(_._2)
   }
 
 }
