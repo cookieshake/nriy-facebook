@@ -4,14 +4,16 @@ package net.ingtra.nriyfacebook
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.twitter.penguin.korean.TwitterKoreanProcessor
 import net.ingtra.nriyfacebook.algolcheck.AlgolCheck
-import net.ingtra.nriyfacebook.tools.{GetResults, Namer, TfMap}
+import net.ingtra.nriyfacebook.tools.{GetResults, TfMap}
 import org.json.JSONObject
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.{MongoClient, MongoCollection, MongoWriteException}
 import org.mongodb.scala.bson.collection.immutable.Document
 
 import scala.collection.mutable
+import scala.util.matching.Regex
 
 
 object Grabber {
@@ -24,9 +26,7 @@ object Grabber {
     val algolCheck = new AlgolCheck(Setting.graphApiKey)
 
     def putItToDb(json: JSONObject): Unit = {
-      val abbreviated = Namer.abbreviateJson(json)
-
-      try GetResults(collection.insertOne(Document(abbreviated.toString)))
+      try GetResults(collection.insertOne(Document(json.toString)))
       catch { case e: MongoWriteException => println(s"Count: $count " + e.getMessage) }
 
       count += 1
@@ -35,6 +35,26 @@ object Grabber {
 
     algolCheck.requestData(pageName + "/feed").foreach(putItToDb)
     count
+  }
+
+  def grabComment(id: String): Unit = {
+    val algolCheck = new AlgolCheck(Setting.graphApiKey)
+    val data = algolCheck.requestData(id + "/comments", Seq("message_tags", "message", "created_time"))
+
+    while(data.hasNext) {
+      val datum = data.next
+
+      if (!datum.has("message_tags")) {
+        var message = datum.getString("message")
+        message = new Regex("\\(.*\\)").replaceAllIn(message, "")
+        message = new Regex("#.*\\s").replaceAllIn(message, "")
+        message = new Regex("@.*\\s").replaceAllIn(message, "")
+        if (message.length != 3)
+          println(message.trim)
+      }
+
+    }
+
   }
 }
 

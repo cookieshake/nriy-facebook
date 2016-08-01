@@ -3,7 +3,7 @@ package net.ingtra.nriyfacebook
 import java.util.concurrent.{CopyOnWriteArrayList, LinkedBlockingDeque}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong, AtomicReference, DoubleAdder}
 
-import net.ingtra.nriyfacebook.tools.{CosineSimularity, GetResults, Namer, TfMap}
+import net.ingtra.nriyfacebook.tools.{CosineSimularity, GetResults, TfMap}
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.{Document, MongoClient}
 import org.mongodb.scala.bson.{BsonArray, BsonValue}
@@ -20,7 +20,7 @@ object Dodumi {
 
     for (i <- 0 until bsonArray.size()) {
       val bson = bsonArray.get(i).asDocument
-      val str = bson.getString(Namer.abbreviate("string")).getValue
+      val str = bson.getString("string").getValue
       val tf = bson.getDouble("tf").getValue
 
       map(str) = tf
@@ -38,10 +38,10 @@ object Dodumi {
 
     def handleDocument(doc: Document): Unit = {
       val bsonDoc = doc.toBsonDocument
-      val bsonArray = bsonDoc.getArray(Namer.abbreviate("tokens"))
+      val bsonArray = bsonDoc.getArray("tokens")
       val tfMap2 = bsonArrayToMap(bsonArray)
 
-      val id = bsonDoc.getString(Namer.abbreviate("id")).getValue
+      val id = bsonDoc.getString("_id").getValue
       val score = CosineSimularity(tfMap, tfMap2)
 
       val now = count.getAndAdd(1)

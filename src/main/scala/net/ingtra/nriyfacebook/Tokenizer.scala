@@ -14,7 +14,7 @@ object Tokenizer {
 
     for (tuple <- map) {
       val bson = BsonDocument()
-      bson.put(Namer.abbreviate("string"), BsonString(tuple._1))
+      bson.put("string", BsonString(tuple._1))
       bson.put("tf", BsonDouble(tuple._2))
 
       bsonArray.add(bson)
@@ -25,12 +25,12 @@ object Tokenizer {
 
   private def contentToDoc(content: Document): Document = {
     val bsonContent = content.toBsonDocument
-    val id = bsonContent.getString(Namer.abbreviate("id"))
-    val msg = bsonContent.getString(Namer.abbreviate("message"))
+    val id = bsonContent.getString("_id")
+    val msg = bsonContent.getString("message")
 
     val bsonDoc = BsonDocument()
     bsonDoc.append("_id", id)
-    bsonDoc.append(Namer.abbreviate("tokens"),mapToBsonArray(TfMap(msg.getValue)))
+    bsonDoc.append("tokens",mapToBsonArray(TfMap(msg.getValue)))
 
     Document(bsonDoc)
   }
@@ -41,7 +41,7 @@ object Tokenizer {
       .getCollection(Setting.tokenizedCollName)
 
     val indexQuery = BsonDocument()
-    indexQuery.put(Namer.abbreviate("tokens") + "." + Namer.abbreviate("string"), BsonInt32(-1))
+    indexQuery.put("tokens" + "." + "string", BsonInt32(-1))
     GetResults(tokenizedCollection.createIndex(indexQuery))
 
     val pageCollection = MongoClient("mongodb://" + Setting.mongoDbHost)

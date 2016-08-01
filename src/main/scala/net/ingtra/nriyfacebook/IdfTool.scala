@@ -38,14 +38,14 @@ object IdfTool {
     var count = 0
 
     def handleContent(content: Document): Unit = {
-      val tokens = content.toBsonDocument.getArray(Namer.abbreviate("tokens")).iterator()
+      val tokens = content.toBsonDocument.getArray("tokens").iterator()
       while (tokens.hasNext) {
-        val token = tokens.next().asDocument().getString(Namer.abbreviate("string")).getValue
+        val token = tokens.next().asDocument().getString("string").getValue
         if (!tokenSet.contains(token)) {
           val query = BsonDocument()
-            .append(Namer.abbreviate("tokens"), BsonDocument()
+            .append("tokens", BsonDocument()
               .append("$elemMatch", BsonDocument()
-                .append(Namer.abbreviate("string"), BsonString(token))))
+                .append("string", BsonString(token))))
           val haveToken = GetResults(tokenizedCollection.count(query)).head
           val idf = math.log(documentCount / haveToken)
 
@@ -89,8 +89,8 @@ object IdfTool {
       }
 
       val bsonDoc = doc.toBsonDocument
-      val bsonId = bsonDoc.getString(Namer.abbreviate("id"))
-      val tokenArray = bsonDoc.getArray(Namer.abbreviate("tokens"))
+      val bsonId = bsonDoc.getString("_id")
+      val tokenArray = bsonDoc.getArray("tokens")
       val changedArray = BsonArray()
 
 
@@ -98,16 +98,16 @@ object IdfTool {
         val token = tokenArray.get(i).asDocument()
         val changedToken = BsonDocument()
 
-        val bsonString = token.getString(Namer.abbreviate("string"))
+        val bsonString = token.getString("string")
         val tf = token.getDouble("tf").getValue
 
-        changedToken.put(Namer.abbreviate("string"), bsonString)
+        changedToken.put("string", bsonString)
         changedToken.put("tf", BsonDouble(tf * idf(bsonString.getValue)))
 
         changedArray.add(changedToken)
       }
 
-      bsonDoc.replace(Namer.abbreviate("tokens"), changedArray)
+      bsonDoc.replace("tokens", changedArray)
 
       GetResults(idfedCollection.insertOne(Document(bsonDoc)))
       count += 1

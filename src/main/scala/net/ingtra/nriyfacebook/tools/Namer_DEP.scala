@@ -5,7 +5,7 @@ import org.mongodb.scala.Document
 
 import scala.collection.mutable
 
-object Namer {
+object Namer_DEP {
   val map = Map(
     "created_time" -> "ct",
     "id" -> "_id",
