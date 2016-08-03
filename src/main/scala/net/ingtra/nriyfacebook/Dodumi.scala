@@ -3,12 +3,16 @@ package net.ingtra.nriyfacebook
 import java.util.concurrent.{CopyOnWriteArrayList, LinkedBlockingDeque}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong, AtomicReference, DoubleAdder}
 
+import net.ingtra.nriyfacebook.algolcheck.AlgolCheck
 import net.ingtra.nriyfacebook.tools.{CosineSimularity, GetResults, TfMap}
+import org.json.JSONObject
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.{Document, MongoClient}
 import org.mongodb.scala.bson.{BsonArray, BsonValue}
 
 import scala.collection.mutable
+import scala.util.Random
+import scala.util.matching.Regex
 
 object Dodumi {
   val idfedCollection = MongoClient("mongodb://" + Setting.mongoDbHost)
@@ -29,7 +33,34 @@ object Dodumi {
     map.toMap
   }
 
-  def compare(string: String, thread: Int = 1): Array[(String, Double)] = {
+  private def selectComment(comment: JSONObject): Boolean = {
+    if (comment.has("message_tags")) return false
+
+    val message = comment.getString("message")
+
+    if (new Regex("#.*\\s").findFirstIn(message).nonEmpty) return false
+    if (new Regex("@.*\\s").findFirstIn(message).nonEmpty) return false
+    if (new Regex("\\(.*\\)").findFirstIn(message).nonEmpty) return false
+    if (message.length < 3) return false
+    if (20 < message.length) return false
+
+    true
+  }
+
+  private def grabComments(id: String): Seq[String] = {
+    val algolCheck = new AlgolCheck(Setting.graphApiKey)
+    val comments = algolCheck.requestData(id + "/comments", Seq("message_tags", "message", "created_time"))
+    val toReturn = mutable.ArrayBuffer[String]()
+
+    for (cmt <- comments) {
+      if (selectComment(cmt))
+        toReturn.append(cmt.getString("message"))
+    }
+
+    toReturn
+  }
+
+  private def compare(string: String, thread: Int = 1): Array[(String, Double)] = {
     val tfMap = TfMap.withIdf(string, IdfTool.getIdf)
     val count = new AtomicInteger()
     val que = new LinkedBlockingDeque[Document]()
@@ -45,7 +76,7 @@ object Dodumi {
       val score = CosineSimularity(tfMap, tfMap2)
 
       val now = count.getAndAdd(1)
-      if (now % 1000 == 0) println(s"Now: $now")
+      if (now % 5000 == 0) println(s"Now: $now")
 
       result.add((id, score))
     }
@@ -84,10 +115,34 @@ object Dodumi {
       while (!finished) Thread.sleep(1000)
     }
 
+    println(s"Finished : $count")
+
     var resultArray = result.toArray[(String, Double)](Array[(String, Double)]())
 
     resultArray = resultArray.sortBy(_._2)
     resultArray.reverse
+  }
+
+  def reply(message: String): String = {
+    val scoreArray = compare(message)
+    var comments = mutable.ArrayBuffer[(String, Double)]()
+
+    var index = 0
+    while (!(scoreArray(index)._2 < 0.3 || comments.length > 50) || (index < 5 || comments.length < 10)) {
+
+      grabComments(scoreArray(index)._1).foreach(
+        (cmt: String) => comments.append((cmt, CosineSimularity(TfMap.withIdf(message, IdfTool.getIdf), TfMap.withIdf(cmt, IdfTool.getIdf))))
+      )
+
+      index += 1
+    }
+
+    comments = comments.sortBy(_._2).reverse
+
+    val high = comments.filter(_._2 > 0.4)
+
+    if (high.nonEmpty) high(Random.nextInt(high.length))._1
+    else comments(0)._1
   }
 
 }

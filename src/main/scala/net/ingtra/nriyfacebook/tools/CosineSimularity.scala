@@ -6,6 +6,8 @@ import scala.math._
 
 object CosineSimularity {
   def apply(map1: Map[String, Double], map2: Map[String, Double]): Double = {
+    if (map1.size == 0 || map2.size == 0) return 0.0
+
     var maginitudeA: Double = 0
     map1.foreach((tuple: (String, Double)) => maginitudeA += pow(tuple._2, 2))
 
