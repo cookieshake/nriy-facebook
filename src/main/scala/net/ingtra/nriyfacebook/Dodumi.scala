@@ -85,6 +85,7 @@ object Dodumi {
     }
 
     var resultArray = result.toArray[(String, Double)](Array[(String, Double)]())
+
     resultArray = resultArray.sortBy(_._2)
     resultArray.reverse
   }

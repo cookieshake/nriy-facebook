@@ -3,7 +3,7 @@ package net.ingtra.nriyfacebook
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-import net.ingtra.nriyfacebook.tools.{GetResults, Namer, TfMap}
+import net.ingtra.nriyfacebook.tools.{GetResults, TfMap}
 import org.mongodb.scala.MongoClient
 import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonDouble, BsonInt32, BsonString}
 import org.mongodb.scala.bson.collection.immutable.Document

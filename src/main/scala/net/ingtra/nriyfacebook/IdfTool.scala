@@ -1,6 +1,6 @@
 package net.ingtra.nriyfacebook
 
-import net.ingtra.nriyfacebook.tools.{GetResults, Namer}
+import net.ingtra.nriyfacebook.tools.GetResults
 import org.bson.BsonValue
 import org.mongodb.scala.MongoClient
 import org.mongodb.scala.bson.collection.immutable.Document
@@ -47,7 +47,7 @@ object IdfTool {
               .append("$elemMatch", BsonDocument()
                 .append("string", BsonString(token))))
           val haveToken = GetResults(tokenizedCollection.count(query)).head
-          val idf = math.log(documentCount / haveToken)
+          var idf = math.log(documentCount / haveToken) max 0.1
 
           putIdf(token, idf)
           tokenSet.add(token)
@@ -71,7 +71,7 @@ object IdfTool {
     if (findResult.size != 0)
       findResult.head.toBsonDocument.getDouble("idf").getValue
     else
-      1.0
+      10.0
   }//GetResults(idfCollection.find(BsonDocument().append("_id", BsonString(string))).first).head.toBsonDocument.getDouble("idf").getValue
 
   def transitTokenizeds(): Unit = {
