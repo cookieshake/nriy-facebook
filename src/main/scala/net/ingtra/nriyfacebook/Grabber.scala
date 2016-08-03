@@ -23,9 +23,20 @@ object Grabber {
       .getDatabase(Setting.pageGrabDbName)
       .getCollection(Setting.pageGrabCollName)
 
+    GetResults(collection.createIndex(Document({"{created_time:-1}"})))
+
     val algolCheck = new AlgolCheck(Setting.graphApiKey)
+    val pageId = algolCheck.request(pageName).getString("id")
+
+    val recentTime = GetResults(collection.find()
+      .filter(Document(s"{_id:/^$pageId/}"))
+      .projection(Document("{created_time:1}"))
+      .sort(Document("{created_time:-1}")))
+      .head.toBsonDocument
+      .getString("created_time").getValue
 
     def putItToDb(json: JSONObject): Unit = {
+
       count += 1
       if (count % 1000 == 0) println(s"Grabbing $pageName : $count")
 
@@ -40,7 +51,14 @@ object Grabber {
 
     }
 
-    algolCheck.requestData(pageName + "/feed").foreach(putItToDb)
+    var switch = true
+    val feeds = algolCheck.requestData(pageName + "/feed")
+    while (switch && feeds.hasNext) {
+      val feed = feeds.next
+      if (feed.getString("created_time") <= recentTime) switch = false
+      else putItToDb(feed)
+    }
+
     count
   }
 
