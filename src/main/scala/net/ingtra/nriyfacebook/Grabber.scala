@@ -28,12 +28,14 @@ object Grabber {
     val algolCheck = new AlgolCheck(Setting.graphApiKey)
     val pageId = algolCheck.request(pageName).getString("id")
 
-    val recentTime = GetResults(collection.find()
+    val recentTimeQuery = GetResults(collection.find()
       .filter(Document(s"{_id:/^$pageId/}"))
       .projection(Document("{created_time:1}"))
       .sort(Document("{created_time:-1}")))
-      .head.toBsonDocument
-      .getString("created_time").getValue
+    var recentTime = ""
+
+    if (recentTimeQuery.nonEmpty) recentTime = recentTimeQuery.head.toBsonDocument.getString("created_time").getValue
+
 
     def putItToDb(json: JSONObject): Unit = {
 
