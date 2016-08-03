@@ -40,6 +40,8 @@ object Tokenizer {
       .getDatabase(Setting.tokenizedDbName)
       .getCollection(Setting.tokenizedCollName)
 
+    val tokenizedIds = for (tokenized <- GetResults(tokenizedCollection.find().projection(Document("{_id:1}")))) yield tokenized.toBsonDocument.getString("_id").getValue
+
     val indexQuery = BsonDocument()
     indexQuery.put("tokens" + "." + "string", BsonInt32(-1))
     GetResults(tokenizedCollection.createIndex(indexQuery))
@@ -75,11 +77,18 @@ object Tokenizer {
       def exit() = flag = false
     }
 
+    def notTokenized(doc: Document): Boolean = {
+      val id = doc.toBsonDocument.getString("_id").getValue
+
+      if (tokenizedIds.contains(id)) false
+      else true
+    }
+
     val threadSeq = for (i <- 1 to threads) yield new TokenizeWorker()
     threadSeq.foreach(_.start)
 
     var finished = false
-    pageCollection.find().subscribe((doc: Document) => que.put(doc), (err: Throwable) => println(err), () => finished = true)
+    pageCollection.find().subscribe((doc: Document) => if(notTokenized(doc)) que.put(doc), (err: Throwable) => println(err), () => finished = true)
     while (!finished) Thread.sleep(1000)
 
     threadSeq.foreach(_.exit())
