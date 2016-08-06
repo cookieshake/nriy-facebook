@@ -141,8 +141,8 @@ object Dodumi {
 
     val high = comments.filter(_._2 > 0.4)
 
-    if (high.nonEmpty) high(Random.nextInt(high.length))._1
-    else comments(0)._1
+    if (high.length >= 3) high(Random.nextInt(high.length))._1
+    else comments(Random.nextInt(3))._1
   }
 
 }

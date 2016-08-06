@@ -20,7 +20,7 @@ object IdfTool {
     .getCollection(Setting.idfedCollName)
 
 
-  def putIdf(string: String, idf: Double): Unit = {
+  private def putIdf(string: String, idf: Double): Unit = {
     val bson = BsonDocument()
       .append("_id", BsonString(string))
       .append("idf", BsonDouble(idf))
@@ -36,6 +36,8 @@ object IdfTool {
     val tokenSet = mutable.HashSet[String]()
     val documentCount = GetResults(tokenizedCollection.count()).head
     var count = 0
+
+    GetResults(idfCollection.drop())
 
     def handleContent(content: Document): Unit = {
       val tokens = content.toBsonDocument.getArray("tokens").iterator()
@@ -54,7 +56,7 @@ object IdfTool {
         }
       }
       count += 1
-      if (count % 500 ==0) println(s"Calculating: $count/$documentCount")
+      if (count % 1000 ==0) println(s"Calculating: $count/$documentCount")
     }
 
     var finished = false
@@ -77,6 +79,8 @@ object IdfTool {
   def transitTokenizeds(): Unit = {
     val idfMap = mutable.HashMap[String, Double]()
     var count = 0
+
+    GetResults(idfedCollection.drop())
 
     def handleDocument(doc: Document): Unit = {
       def idf(string: String): Double = {
